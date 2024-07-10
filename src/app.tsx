@@ -1,7 +1,202 @@
+import {
+  MapPin,
+  Calendar,
+  ArrowRight,
+  UserRoundPlus,
+  Settings2,
+  X,
+  AtSign,
+  Plus,
+} from "lucide-react";
+import { FormEvent, useState } from "react";
+
 export function App() {
+  const [isGuestsInputOpen, setIsGuestsInputOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [emailsToInvite, setEmailsToInvite] = useState<string[]>([]);
+  const [currentTypedEmail, setCurrentTypedEmail] = useState<string>("");
+
+  function toggleGuestsInput() {
+    setIsGuestsInputOpen((isOpen) => !isOpen);
+  }
+
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+
+    if (currentTypedEmail) {
+      if (emailsToInvite.includes(currentTypedEmail)) {
+        alert("E-mail already included.");
+        return;
+      }
+
+      setEmailsToInvite((e) => [...e, currentTypedEmail]);
+      setCurrentTypedEmail("");
+    }
+  }
+
+  function openModal() {
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setIsModalOpen(false);
+  }
+
+  function removeEmailFromInvites(email: string) {
+    setEmailsToInvite((emails) => emails.filter((e) => e != email));
+  }
+
   return (
-    <div className="w-full bg-black py-2 flex items-center justify-center">
-      <h1 className="text-3xl font-bold underline text-white">Hello, world!</h1>
+    <div className="w-full h-screen flex items-center justify-center bg-pattern bg-no-repeat bg-center">
+      <div className="max-w-3xl w-full px-6 text-center space-y-10">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/logo.svg" alt="Plann.er logo" width={172} height={44} />
+
+          <p className="text-center text-lg">Convide seus amigos e planeje sua próxima viagem!</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="h-16 bg-zinc-900 px-4 rounded-xl flex items-center shadow-shape gap-3">
+            <div className="flex items-center gap-2 flex-1">
+              <MapPin className="text-zinc-400 size-5" />
+              <input
+                disabled={isGuestsInputOpen}
+                type="text"
+                name="destination"
+                placeholder="Para onde vocẽ vai?"
+                className="bg-transparent text-lg placeholder:zinc-400 outline-none flex-1"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Calendar className="text-zinc-400 size-5" />
+              <input
+                disabled={isGuestsInputOpen}
+                type="text"
+                name="starts-at"
+                placeholder="Quando?"
+                className="bg-transparent text-lg placeholder:zinc-400 w-40 outline-none"
+              />
+            </div>
+
+            <div className="h-6 w-px bg-zinc-800"></div>
+
+            {isGuestsInputOpen ? (
+              <button
+                onClick={toggleGuestsInput}
+                className="bg-zinc-800 text-zic-200 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-zinc-700"
+              >
+                Alterar local/data
+                <Settings2 className="size-5 text-zinc-200" />
+              </button>
+            ) : (
+              <button
+                onClick={toggleGuestsInput}
+                className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400"
+              >
+                Continuar
+                <ArrowRight className="size-5 text-lime-950" />
+              </button>
+            )}
+          </div>
+
+          {isGuestsInputOpen && (
+            <div className="h-16 bg-zinc-900 px-4 rounded-xl flex items-center shadow-shape gap-3">
+              <div className="flex items-center gap-2 flex-1">
+                <UserRoundPlus className="text-zinc-400 size-5" />
+                <button
+                  onClick={openModal}
+                  className="bg-transparent text-lg placeholder:zinc-400 outline-none flex-1 text-left"
+                >
+                  Quem estará na viagem?
+                </button>
+              </div>
+
+              <div className="h-6 w-px bg-zinc-800"></div>
+
+              <button
+                onClick={toggleGuestsInput}
+                className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400"
+              >
+                Confirmar viagem
+                <ArrowRight className="size-5 text-lime-950" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <p className="text-sm text-zinc-500">
+          Ao planejar sua viagem pela plann.er você automaticamente concorda <br /> com nossos{" "}
+          <a href="#" className="text-zinc-300 underline">
+            termos de uso
+          </a>{" "}
+          e{" "}
+          <a href="#" className="text-zinc-300 underline">
+            políticas de privacidade
+          </a>
+          .
+        </p>
+      </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60">
+          <div className="w-[640px] rounded-xl py-5 px-6 shadow-shape bg-zinc-900 space-y-5">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-lg">Selecionar convidados </h2>
+
+                <button name="close modal" onClick={closeModal}>
+                  <X className="size-5 text-zinc-400" />
+                </button>
+              </div>
+
+              <p className="text-sm text-zinc-400">
+                Os convidados irão receber e-mails para confirmar a participação na viagem.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {emailsToInvite.map((email) => (
+                <div
+                  key={email}
+                  className="py-1.5 px-2.5 rounded-md bg-zinc-800 flex items-center gap-3"
+                >
+                  <span className="text-300">{email}</span>
+
+                  <button name="remove guest" onClick={() => removeEmailFromInvites(email)}>
+                    <X className="size-4 text-zinc-400" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="h-pixel w-full bg-zinc-800"></div>
+
+            <form
+              onSubmit={handleSubmit}
+              className="p-2.5 bg-zinc-950 border border-zinc-800 rounded-lg flex items-center gap-2"
+            >
+              <div className="flex items-center gap-2 flex-1">
+                <AtSign className="text-zinc-400 size-5" />
+
+                <input
+                  value={currentTypedEmail}
+                  onChange={(e) => setCurrentTypedEmail(e.target.value)}
+                  type="text"
+                  name="starts-at"
+                  placeholder="Digite o e-mail do convidado"
+                  className="bg-transparent text-lg placeholder:zinc-400 flex-1 outline-none"
+                />
+              </div>
+
+              <button className="bg-lime-300 text-lime-950 rounded-lg px-5 py-2 font-medium flex items-center gap-2 hover:bg-lime-400">
+                Convidar
+                <Plus className="size-5" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
